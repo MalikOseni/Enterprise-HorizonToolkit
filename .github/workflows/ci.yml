@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   scriptanalyzer:
@@ -12,7 +12,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -140,15 +139,13 @@ jobs:
       - name: Confirm no company-specific strings
         shell: pwsh
         run: |
-          # Ensure no environment-specific or company-identifying values
-          # have been committed to any script or config file.
           $sensitivePatterns = @(
-            'CS\d{2}\.',          # Connection server naming patterns
-            '\.local''',          # Domain suffixes in string literals
-            'gts\.',              # Domain prefix in string literals
-            '172\.\d+\.\d+\.\d+', # Private IP ranges
-            '192\.168\.\d+\.\d+', # Private IP ranges
-            '10\.\d+\.\d+\.\d+'   # Private IP ranges
+            'CS\d{2}\.',
+            '\.local''',
+            'gts\.','GTS\.','GTS-','GTS_','GTST-','GTST\.','GTS_'',
+            '172\.\d+\.\d+\.\d+',
+            '192\.168\.\d+\.\d+',
+            '10\.\d+\.\d+\.\d+'
           )
 
           $files = Get-ChildItem `
@@ -158,9 +155,11 @@ jobs:
             Where-Object { $_.FullName -notmatch '\\\.git\\' }
 
           $hits = foreach ($file in $files) {
-            $lines = Get-Content $file.FullName
+            $lines = @(Get-Content $file.FullName -ErrorAction SilentlyContinue)
+            if (-not $lines -or $lines.Count -eq 0) { continue }
             foreach ($i in 0..($lines.Count - 1)) {
               $line = $lines[$i]
+              if ([string]::IsNullOrWhiteSpace($line)) { continue }
               if ($line.Trim().StartsWith('#')) { continue }
               foreach ($pattern in $sensitivePatterns) {
                 if ($line -match $pattern) {
