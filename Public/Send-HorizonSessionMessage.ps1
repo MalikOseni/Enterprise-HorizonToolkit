@@ -91,24 +91,24 @@ function Send-HorizonSessionMessage {
 
             Write-Verbose "Searching for connected session on [$MachineName]."
 
-            $Matches = @(
+            $MatchedSessions  = @(
                 Get-HorizonSessions -MachineName $MachineName |
                 Where-Object SessionState -eq 'CONNECTED'
             )
 
-            if ($Matches.Count -eq 0) {
+            if ($MatchedSessions.Count -eq 0) {
 
                 throw "No connected Horizon session exists on [$MachineName]."
 
             }
 
-            if ($Matches.Count -gt 1) {
+            if ($MatchedSessions.Count -gt 1) {
 
                 throw "Multiple connected sessions were found on [$MachineName]. Refine the target."
 
             }
 
-            $Session = $Matches[0]
+            $Session = $MatchedSessions[0]
 
             $Plan = [PSCustomObject]@{
 

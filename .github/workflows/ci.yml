@@ -1,59 +1,59 @@
 name: CI
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
-  scriptanalyzer:
-    name: PSScriptAnalyzer
-    runs-on: windows-latest
+    scriptanalyzer:
+        name: PSScriptAnalyzer
+        runs-on: windows-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Install PSScriptAnalyzer
-        shell: pwsh
-        run: |
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+            - name: Install PSScriptAnalyzer
+              shell: pwsh
+              run: |
+                  Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
-      - name: Run PSScriptAnalyzer — Public
-        shell: pwsh
-        run: |
-          $results = Invoke-ScriptAnalyzer -Path .\Public -Recurse -Severity Error, Warning
-          if ($results) {
-            $results | Format-Table -AutoSize
-            throw "PSScriptAnalyzer found $($results.Count) issue(s) in Public."
-          }
-          Write-Host "Public — clean."
+            - name: Run PSScriptAnalyzer — Public
+              shell: pwsh
+              run: |
+                  $results = Invoke-ScriptAnalyzer -Path .\Public -Recurse -Severity Error, Warning
+                  if ($results) {
+                    $results | Format-Table -AutoSize
+                    throw "PSScriptAnalyzer found $($results.Count) issue(s) in Public."
+                  }
+                  Write-Host "Public — clean."
 
-      - name: Run PSScriptAnalyzer — Private
-        shell: pwsh
-        run: |
-          $results = Invoke-ScriptAnalyzer -Path .\Private -Recurse -Severity Error, Warning
-          if ($results) {
-            $results | Format-Table -AutoSize
-            throw "PSScriptAnalyzer found $($results.Count) issue(s) in Private."
-          }
-          Write-Host "Private — clean."
+            - name: Run PSScriptAnalyzer — Private
+              shell: pwsh
+              run: |
+                  $results = Invoke-ScriptAnalyzer -Path .\Private -Recurse -Severity Error, Warning
+                  if ($results) {
+                    $results | Format-Table -AutoSize
+                    throw "PSScriptAnalyzer found $($results.Count) issue(s) in Private."
+                  }
+                  Write-Host "Private — clean."
 
-      - name: Validate module manifest
-        shell: pwsh
-        run: |
-          $result = Test-ModuleManifest .\Enterprise-HorizonToolkit.psd1
-          Write-Host "Manifest valid — $($result.Name) v$($result.Version)"
+            - name: Validate module manifest
+              shell: pwsh
+              run: |
+                  $result = Test-ModuleManifest .\Enterprise-HorizonToolkit.psd1
+                  Write-Host "Manifest valid — $($result.Name) v$($result.Version)"
 
-      - name: Check for sensitive strings
-        shell: pwsh
-        run: |
-          $patterns = @('password\s*=', 'apikey', 'secret\s*=', 'connectionstring')
-          $files = Get-ChildItem -Recurse -Include *.ps1, *.psd1, *.psm1
-          $hits = $files | Select-String -Pattern ($patterns -join '|') -CaseSensitive:$false
-          if ($hits) {
-            $hits | Format-List
-            throw "Potential sensitive string found — review before merging."
-          }
-          Write-Host "Sensitive string check — clean."
+            - name: Check for sensitive strings
+              shell: pwsh
+              run: |
+                  $patterns = @('password\s*=', 'apikey', 'secret\s*=', 'connectionstring')
+                  $files = Get-ChildItem -Recurse -Include *.ps1, *.psd1, *.psm1
+                  $hits = $files | Select-String -Pattern ($patterns -join '|') -CaseSensitive:$false
+                  if ($hits) {
+                    $hits | Format-List
+                    throw "Potential sensitive string found — review before merging."
+                  }
+                  Write-Host "Sensitive string check — clean."
