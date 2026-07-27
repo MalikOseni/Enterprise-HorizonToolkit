@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 
 <#
 .SYNOPSIS
@@ -9,10 +9,10 @@
 
     Handles:
 
-        • Query creation
-        • Paging
-        • Cleanup
-        • Error handling
+        â€¢ Query creation
+        â€¢ Paging
+        â€¢ Cleanup
+        â€¢ Error handling
 
 .NOTES
 
