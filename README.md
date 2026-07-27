@@ -1,3 +1,6 @@
+[![CI](https://github.com/MalikOseni/Enterprise-HorizonToolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/MalikOseni/Enterprise-HorizonToolkit/actions/workflows/ci.yml)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/Enterprise-HorizonToolkit)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
+
 # Enterprise-HorizonToolkit
 
 > A PowerShell module for VMware Horizon administrators — real-time session
