@@ -67,6 +67,14 @@ jobs:
       - name: Validate module manifest
         shell: pwsh
         run: |
+          # Install the VMware dependency so Test-ModuleManifest can resolve
+          # the RequiredModules entry. This mirrors what a real install does.
+          Install-Module VMware.VimAutomation.HorizonView `
+            -Force `
+            -Scope CurrentUser `
+            -SkipPublisherCheck `
+            -ErrorAction Stop
+
           try {
             $result = Test-ModuleManifest `
               -Path .\Enterprise-HorizonToolkit.psd1 `
