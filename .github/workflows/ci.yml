@@ -140,7 +140,7 @@ jobs:
         shell: pwsh
         run: |
           $sensitivePatterns = @(
-            'CS\d{2}\.',
+            'GTST-CS\d+\.',
             'gts\.',
             'GTS\.',
             'GTS-',
