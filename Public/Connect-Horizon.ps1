@@ -98,22 +98,17 @@ function Connect-Horizon {
         [System.Management.Automation.PSCredential]
         $Credential,
 
-        [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-            'PSAvoidUsingPlainTextForPassword', 'CredentialPath',
-            Justification = 'CredentialPath is a file path to an encrypted CLIXML file, not a plaintext password.'
-        )]
-
         [Parameter(
             Mandatory,
             ParameterSetName = 'CredentialFile'
         )]
         [ValidateScript({
-                if (-not (Test-Path $_)) {
-                    throw "Credential file not found: $_"
+                if (-not (Test-Path $_.FullName)) {
+                    throw "Credential file not found: $($_.FullName)"
                 }
                 $true
             })]
-        [string]
+        [System.IO.FileInfo]
         $CredentialPath,
 
         # ── Behaviour flags ─────────────────────────────────────────────────
@@ -310,11 +305,11 @@ function Connect-Horizon {
 
         if ($PSCmdlet.ParameterSetName -eq 'CredentialFile') {
 
-            Write-Verbose "Importing credential from $CredentialPath"
+            Write-Verbose "Importing credential from $($CredentialPath.FullName)"
 
             try {
 
-                $Credential = Import-Clixml -Path $CredentialPath -ErrorAction Stop
+                $Credential = Import-Clixml -Path $CredentialPath.FullName -ErrorAction Stop
 
             }
             catch {
