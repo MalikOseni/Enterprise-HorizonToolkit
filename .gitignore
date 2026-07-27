@@ -1,0 +1,36 @@
+# Environment-specific configuration and credentials
+Config/ToolkitConfig.local.psd1
+*.clixml
+*cred*.xml
+
+# Runtime output can contain user, session, and machine details
+Logs/
+Reports/
+
+# Local editor settings
+.vscode/# Environment-specific configuration and credentials
+Config/ToolkitConfig.local.psd1
+Config/ToolkitConfig.psd1
+*.clixml
+*cred*.xml
+*.xml
+
+# Runtime output can contain user, session, and machine details
+Logs/
+Reports/
+
+# Local editor settings
+.vscode/
+.idea/
+
+# PowerShell test output
+TestResults/
+*.TestResults.xml
+
+# NuGet / Gallery packaging artifacts
+*.nupkg
+*.nuspec
+
+# OS noise
+.DS_Store
+Thumbs.db
