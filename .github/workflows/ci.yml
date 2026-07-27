@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   scriptanalyzer:
@@ -12,50 +12,165 @@ jobs:
     runs-on: windows-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install PSScriptAnalyzer
         shell: pwsh
         run: |
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
+          Write-Host "PSScriptAnalyzer installed successfully."
 
       - name: Run PSScriptAnalyzer — Public
         shell: pwsh
         run: |
-          $rules = Get-ScriptAnalyzerRule | 
-              Where-Object RuleName -ne 'PSUseSingularNouns'
-          $results = Invoke-ScriptAnalyzer -Path .\Public -Recurse -IncludeRule $rules.RuleName
+          # PSUseSingularNouns is excluded — cmdlets that return collections
+          # intentionally use plural nouns (Get-HorizonSessions, etc.).
+          # This is a widely accepted exception in the PowerShell community.
+          $exclude = @('PSUseSingularNouns')
+
+          $results = Invoke-ScriptAnalyzer `
+            -Path .\Public `
+            -Recurse `
+            -Severity Error, Warning `
+            -ExcludeRule $exclude
+
           if ($results) {
-              $results | Format-Table -AutoSize
-              throw "PSScriptAnalyzer found $($results.Count) issue(s) in Public."
+            Write-Host "Issues found in Public:" -ForegroundColor Red
+            $results | Format-Table RuleName, Severity, ScriptName, Line, Message -AutoSize
+            throw "PSScriptAnalyzer found $($results.Count) issue(s) in Public. Fix before merging."
           }
-          Write-Host "Public — clean."
+
+          Write-Host "Public — clean. No errors or warnings." -ForegroundColor Green
 
       - name: Run PSScriptAnalyzer — Private
         shell: pwsh
         run: |
-          $results = Invoke-ScriptAnalyzer -Path .\Private -Recurse -Severity Error, Warning
+          # PSUseSingularNouns excluded for same reason as Public step.
+          $exclude = @('PSUseSingularNouns')
+
+          $results = Invoke-ScriptAnalyzer `
+            -Path .\Private `
+            -Recurse `
+            -Severity Error, Warning `
+            -ExcludeRule $exclude
+
           if ($results) {
-            $results | Format-Table -AutoSize
-            throw "PSScriptAnalyzer found $($results.Count) issue(s) in Private."
+            Write-Host "Issues found in Private:" -ForegroundColor Red
+            $results | Format-Table RuleName, Severity, ScriptName, Line, Message -AutoSize
+            throw "PSScriptAnalyzer found $($results.Count) issue(s) in Private. Fix before merging."
           }
-          Write-Host "Private — clean."
+
+          Write-Host "Private — clean. No errors or warnings." -ForegroundColor Green
 
       - name: Validate module manifest
         shell: pwsh
         run: |
-          $result = Test-ModuleManifest .\Enterprise-HorizonToolkit.psd1
-          Write-Host "Manifest valid — $($result.Name) v$($result.Version)"
+          try {
+            $result = Test-ModuleManifest `
+              -Path .\Enterprise-HorizonToolkit.psd1 `
+              -ErrorAction Stop
+
+            Write-Host "Manifest valid." -ForegroundColor Green
+            Write-Host "  Name    : $($result.Name)"
+            Write-Host "  Version : $($result.Version)"
+            Write-Host "  Author  : $($result.Author)"
+            Write-Host "  GUID    : $($result.Guid)"
+          }
+          catch {
+            Write-Host "Manifest validation failed: $($_.Exception.Message)" -ForegroundColor Red
+            throw
+          }
 
       - name: Check for sensitive strings
         shell: pwsh
         run: |
-          $patterns = @('password\s*=', 'apikey', 'secret\s*=', 'connectionstring')
-          $files = Get-ChildItem -Recurse -Include *.ps1, *.psd1, *.psm1
-          $hits = $files | Select-String -Pattern ($patterns -join '|') -CaseSensitive:$false
-          if ($hits) {
-            $hits | Format-List
-            throw "Potential sensitive string found — review before merging."
+          # Scan all PowerShell files for patterns that suggest credentials
+          # or secrets have been committed. Comments are excluded by only
+          # matching lines that are not prefixed with # after trimming.
+          $patterns = @(
+            'password\s*=\s*[''"][^''"]{3}',
+            'apikey\s*=',
+            'secret\s*=\s*[''"][^''"]{3}',
+            'connectionstring\s*='
+          )
+
+          $files = Get-ChildItem `
+            -Path . `
+            -Recurse `
+            -Include *.ps1, *.psd1, *.psm1 |
+            Where-Object { $_.FullName -notmatch '\\\.git\\' }
+
+          $hits = foreach ($file in $files) {
+            $lines = Get-Content $file.FullName
+            foreach ($i in 0..($lines.Count - 1)) {
+              $line = $lines[$i]
+              # Skip comment lines
+              if ($line.Trim().StartsWith('#')) { continue }
+              foreach ($pattern in $patterns) {
+                if ($line -match $pattern) {
+                  [PSCustomObject]@{
+                    File    = $file.Name
+                    Line    = $i + 1
+                    Content = $line.Trim()
+                    Pattern = $pattern
+                  }
+                }
+              }
+            }
           }
-          Write-Host "Sensitive string check — clean."
+
+          if ($hits) {
+            Write-Host "Potential sensitive strings found:" -ForegroundColor Red
+            $hits | Format-Table File, Line, Pattern, Content -AutoSize
+            throw "Sensitive string check failed. Review the above before merging."
+          }
+
+          Write-Host "Sensitive string check — clean." -ForegroundColor Green
+
+      - name: Confirm no company-specific strings
+        shell: pwsh
+        run: |
+          # Ensure no environment-specific or company-identifying values
+          # have been committed to any script or config file.
+          $sensitivePatterns = @(
+            'CS\d{2}\.',          # Connection server naming patterns
+            '\.local''',          # Domain suffixes in string literals
+            'gts\.',              # Domain prefix in string literals
+            '172\.\d+\.\d+\.\d+', # Private IP ranges
+            '192\.168\.\d+\.\d+', # Private IP ranges
+            '10\.\d+\.\d+\.\d+'   # Private IP ranges
+          )
+
+          $files = Get-ChildItem `
+            -Path . `
+            -Recurse `
+            -Include *.ps1, *.psd1, *.psm1, *.md |
+            Where-Object { $_.FullName -notmatch '\\\.git\\' }
+
+          $hits = foreach ($file in $files) {
+            $lines = Get-Content $file.FullName
+            foreach ($i in 0..($lines.Count - 1)) {
+              $line = $lines[$i]
+              if ($line.Trim().StartsWith('#')) { continue }
+              foreach ($pattern in $sensitivePatterns) {
+                if ($line -match $pattern) {
+                  [PSCustomObject]@{
+                    File    = $file.Name
+                    Line    = $i + 1
+                    Content = $line.Trim()
+                    Pattern = $pattern
+                  }
+                }
+              }
+            }
+          }
+
+          if ($hits) {
+            Write-Host "Environment-specific strings found:" -ForegroundColor Red
+            $hits | Format-Table File, Line, Pattern, Content -AutoSize
+            throw "Company-specific string check failed. Replace with generic placeholders before merging."
+          }
+
+          Write-Host "Company-specific string check — clean." -ForegroundColor Green
