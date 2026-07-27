@@ -98,6 +98,11 @@ function Connect-Horizon {
         [System.Management.Automation.PSCredential]
         $Credential,
 
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+            'PSAvoidUsingPlainTextForPassword', 'CredentialPath',
+            Justification = 'CredentialPath is a file path to an encrypted CLIXML file, not a plaintext password.'
+        )]
+
         [Parameter(
             Mandatory,
             ParameterSetName = 'CredentialFile'
