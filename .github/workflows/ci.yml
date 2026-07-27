@@ -141,8 +141,12 @@ jobs:
         run: |
           $sensitivePatterns = @(
             'CS\d{2}\.',
-            '\.local''',
-            'gts\.','GTS\.','GTS-','GTS_','GTST-','GTST\.','GTS_'',
+            'gts\.',
+            'GTS\.',
+            'GTS-',
+            'GTS_',
+            'GTST-',
+            'GTST\.',
             '172\.\d+\.\d+\.\d+',
             '192\.168\.\d+\.\d+',
             '10\.\d+\.\d+\.\d+'
@@ -160,7 +164,7 @@ jobs:
             foreach ($i in 0..($lines.Count - 1)) {
               $line = $lines[$i]
               if ([string]::IsNullOrWhiteSpace($line)) { continue }
-              if ($line.Trim().StartsWith('#')) { continue }
+              if ($line.TrimStart()[0] -eq '#') { continue }
               foreach ($pattern in $sensitivePatterns) {
                 if ($line -match $pattern) {
                   [PSCustomObject]@{
