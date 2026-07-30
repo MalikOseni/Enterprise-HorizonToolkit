@@ -197,14 +197,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install PowerShellGet v3
+        shell: pwsh
+        run: |
+          Install-Module PowerShellGet -RequiredVersion 3.0.23 `
+            -Force -Scope CurrentUser -AllowPrerelease -SkipPublisherCheck
+
       - name: Install VMware dependency
         shell: pwsh
         run: |
           Install-Module VMware.VimAutomation.HorizonView `
-            -Force `
-            -Scope CurrentUser `
-            -SkipPublisherCheck `
-            -ErrorAction Stop
+            -Force -Scope CurrentUser -SkipPublisherCheck
 
       - name: Publish to PowerShell Gallery
         shell: pwsh

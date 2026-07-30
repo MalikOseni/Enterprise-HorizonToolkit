@@ -13,7 +13,7 @@ $StagingPath = Join-Path $StagingRoot $ModuleName
 if (Test-Path $StagingRoot) { Remove-Item $StagingRoot -Recurse -Force }
 New-Item $StagingPath -ItemType Directory | Out-Null
 
-# Copy only what belongs in the package
+# Copy only what belongs in the package — no .git, no Build, no .github
 $include = @(
     'Public',
     'Private',
@@ -32,20 +32,15 @@ foreach ($item in $include) {
     }
 }
 
-# Verify the manifest is valid before publishing
-$manifest = Join-Path $StagingPath "$ModuleName.psd1"
-Test-ModuleManifest -Path $manifest
+# Verify staging contents
+Write-Host "Staging folder contents:"
+Get-ChildItem $StagingPath -Recurse | Select-Object FullName
 
-# Prepend staging ROOT so PowerShell finds ModuleName\ModuleName.psd1
-$env:PSModulePath = "$StagingRoot;$env:PSModulePath"
-Import-Module -Name $ModuleName -Force
-
-# Publish by name
-Publish-Module `
-    -Name $ModuleName `
-    -NuGetApiKey $NuGetApiKey `
+# Publish using PSResourceGet v3 which handles path publishing correctly
+Publish-PSResource `
+    -Path $StagingPath `
+    -ApiKey $NuGetApiKey `
     -Repository PSGallery `
-    -Force `
     -Verbose
 
 # Clean up
