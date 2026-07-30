@@ -6,7 +6,7 @@
 
     RootModule = 'Enterprise-HorizonToolkit.psm1'
 
-    ModuleVersion = '1.2.0'
+    ModuleVersion = '1.3.0'
 
     GUID = 'b9f6f3c4-9c66-4d73-b7c2-2b2d8d2d5f21'
 

@@ -201,10 +201,7 @@ jobs:
         shell: pwsh
         run: |
           Install-Module VMware.VimAutomation.HorizonView `
-            -Force `
-            -Scope CurrentUser `
-            -SkipPublisherCheck `
-            -ErrorAction Stop
+            -Force -Scope CurrentUser -SkipPublisherCheck
 
       - name: Publish to PowerShell Gallery
         shell: pwsh

@@ -32,20 +32,15 @@ foreach ($item in $include) {
     }
 }
 
-# Verify the manifest is valid before publishing
-$manifest = Join-Path $StagingPath "$ModuleName.psd1"
-Test-ModuleManifest -Path $manifest
+# Show exactly what is going into the package
+Write-Host "Staging contents:"
+Get-ChildItem $StagingPath -Recurse | Select-Object -ExpandProperty FullName
 
-# Prepend staging ROOT so PowerShell finds ModuleName\ModuleName.psd1
-$env:PSModulePath = "$StagingRoot;$env:PSModulePath"
-Import-Module -Name $ModuleName -Force
-
-# Publish by name
-Publish-Module `
-    -Name $ModuleName `
-    -NuGetApiKey $NuGetApiKey `
+# Publish using PSResourceGet — ships with PS7.4+, no install needed
+Publish-PSResource `
+    -Path $StagingPath `
+    -ApiKey $NuGetApiKey `
     -Repository PSGallery `
-    -Force `
     -Verbose
 
 # Clean up
