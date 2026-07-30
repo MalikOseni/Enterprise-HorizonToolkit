@@ -1,4 +1,5 @@
-[![PowerShell Gallery](https://img.shields.io/badge/powershell%20gallery-v1.3.0-blue)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
+[![CI](https://github.com/MalikOseni/Enterprise-HorizonToolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/MalikOseni/Enterprise-HorizonToolkit/actions/workflows/ci.yml)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/Enterprise-HorizonToolkit)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
 
 # Enterprise-HorizonToolkit
 
@@ -416,29 +417,41 @@ Enterprise-HorizonToolkit/
 
 ## Roadmap
 
-- [ ] Guest OS layer — `Invoke-HorizonGuestCleanup`, `Stop-HorizonGuestProcess`,
+- [x] Guest OS layer — `Invoke-HorizonGuestCleanup`, `Stop-HorizonGuestProcess`,
       `Get-HorizonGuestDiagnostic` (via PowerShell remoting over `MachineDNS`)
 - [ ] HTML health report export for client-facing weekly summaries
 - [ ] Pester test suite
-- [ ] GitHub Actions CI — ScriptAnalyzer gate on every push to `main`
+- [x] GitHub Actions CI — ScriptAnalyzer gate on every push to `main`
 - [ ] Scheduled task wrapper scripts for automated daily health checks
 - [ ] Prometheus metrics endpoint
 - [ ] PowerShell 7 cross-platform validation
 
 ---
 
-## Contributing
+# Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-before opening a pull request.
+Thank you for your interest in contributing to Enterprise-HorizonToolkit.
 
-All submissions must pass `Invoke-ScriptAnalyzer` with zero errors before
-review.
+## Before you start
+
+- Open an issue first to discuss the change you want to make
+- All submissions must pass PSScriptAnalyzer with zero errors or warnings
+- Follow the existing code style — verb-noun cmdlet names, comment-based help on every public function
+
+## Running the checks locally
 
 ```powershell
-Invoke-ScriptAnalyzer -Path .\Public -Recurse
-Invoke-ScriptAnalyzer -Path .\Private -Recurse
+Invoke-ScriptAnalyzer -Path .\Public -Recurse -Severity Error, Warning
+Invoke-ScriptAnalyzer -Path .\Private -Recurse -Severity Error, Warning
 ```
+
+## Pull requests
+
+- One feature or fix per PR
+- Update CHANGELOG.md with your change
+- PRs without passing CI will not be reviewed
+
+---
 
 ---
 
