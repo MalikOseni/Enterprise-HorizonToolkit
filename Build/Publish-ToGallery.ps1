@@ -13,7 +13,7 @@ $StagingPath = Join-Path $StagingRoot $ModuleName
 if (Test-Path $StagingRoot) { Remove-Item $StagingRoot -Recurse -Force }
 New-Item $StagingPath -ItemType Directory | Out-Null
 
-# Copy only what belongs in the package — no .git, no Build, no .github
+# Copy only what belongs in the package
 $include = @(
     'Public',
     'Private',
@@ -32,11 +32,11 @@ foreach ($item in $include) {
     }
 }
 
-# Verify staging contents
-Write-Host "Staging folder contents:"
-Get-ChildItem $StagingPath -Recurse | Select-Object FullName
+# Show exactly what is going into the package
+Write-Host "Staging contents:"
+Get-ChildItem $StagingPath -Recurse | Select-Object -ExpandProperty FullName
 
-# Publish using PSResourceGet v3 which handles path publishing correctly
+# Publish using PSResourceGet — ships with PS7.4+, no install needed
 Publish-PSResource `
     -Path $StagingPath `
     -ApiKey $NuGetApiKey `
