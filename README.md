@@ -1,4 +1,5 @@
-[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Enterprise-HorizonToolkit)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
+[![PowerShell Gallery](https://img.shields.io/badge/powershell%20gallery-v1.3.0-blue)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
+
 # Enterprise-HorizonToolkit
 
 > A PowerShell module for VMware Horizon administrators — real-time session
