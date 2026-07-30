@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
 
@@ -185,3 +186,18 @@ jobs:
           }
 
           Write-Host "Company-specific string check — clean." -ForegroundColor Green
+
+  publish:
+    name: Publish to PowerShell Gallery
+    runs-on: windows-latest
+    needs: scriptanalyzer
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        run: |
+          .\Build\Publish-ToGallery.ps1 -NuGetApiKey ${{ secrets.PSGalleryApiKey }} -ErrorAction Stop
