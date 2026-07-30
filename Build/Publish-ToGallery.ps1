@@ -36,7 +36,8 @@ $manifest = Join-Path $StagingPath "$ModuleName.psd1"
 Test-ModuleManifest -Path $manifest
 
 # Publish from the clean staging folder
-Publish-Module -Path $StagingPath -NuGetApiKey $NuGetApiKey -SkipDependenciesCheck -Verbose
+
+Publish-Module -Path $StagingPath -NuGetApiKey $NuGetApiKey -Force -Verbose
 
 # Clean up
 Remove-Item $StagingPath -Recurse -Force
