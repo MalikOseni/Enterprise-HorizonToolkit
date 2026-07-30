@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 
 <#
 .SYNOPSIS
@@ -14,7 +14,7 @@
     descriptive error themselves.
 
 .OUTPUTS
-    Hashtable — populated configuration, or $null if no file is found.
+    Hashtable â€” populated configuration, or $null if no file is found.
 
 .NOTES
     Project : Enterprise-HorizonToolkit
@@ -41,7 +41,7 @@ function Import-HorizonConfiguration {
         $ConfigurationFile = $LocalConfigurationFile
     }
 
-    # No config found — return null with actionable guidance rather than throwing.
+    # No config found â€” return null with actionable guidance rather than throwing.
     # This allows the module to import cleanly in CI and on fresh installs.
     # Cmdlets that need config must call Test-HorizonConfiguration before proceeding.
     if (-not (Test-Path -LiteralPath $ConfigurationFile)) {
@@ -98,7 +98,7 @@ function Import-HorizonConfiguration {
         throw "Configuration validation failed: Horizon.DefaultConnectionServer is missing or empty."
     }
 
-    # CredentialPath is optional — Windows DPAPI-protected XML created under
+    # CredentialPath is optional â€” Windows DPAPI-protected XML created under
     # the service account. Connect-Horizon prompts interactively when absent.
     if (-not $Configuration.Horizon.ContainsKey('CredentialPath')) {
         $Configuration.Horizon.CredentialPath = $null
