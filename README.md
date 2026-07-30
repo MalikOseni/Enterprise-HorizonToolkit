@@ -1,5 +1,5 @@
 [![CI](https://github.com/MalikOseni/Enterprise-HorizonToolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/MalikOseni/Enterprise-HorizonToolkit/actions/workflows/ci.yml)
-[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/Enterprise-HorizonToolkit)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Enterprise-HorizonToolkit?label=PowerShell%20Gallery&cacheSeconds=0)](https://www.powershellgallery.com/packages/Enterprise-HorizonToolkit)
 
 # Enterprise-HorizonToolkit
 
