@@ -197,6 +197,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install VMware dependency
+        shell: pwsh
+        run: |
+          Install-Module VMware.VimAutomation.HorizonView `
+            -Force `
+            -Scope CurrentUser `
+            -SkipPublisherCheck `
+            -ErrorAction Stop
+
       - name: Publish to PowerShell Gallery
         shell: pwsh
         run: |
