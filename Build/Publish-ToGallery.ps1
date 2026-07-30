@@ -6,10 +6,11 @@ param(
 
 $ModuleName  = 'Enterprise-HorizonToolkit'
 $SourcePath  = $PSScriptRoot | Split-Path
-$StagingPath = Join-Path $env:TEMP "$ModuleName-staging"
+$StagingRoot = Join-Path $env:TEMP "$ModuleName-staging"
+$StagingPath = Join-Path $StagingRoot $ModuleName
 
 # Clean staging area
-if (Test-Path $StagingPath) { Remove-Item $StagingPath -Recurse -Force }
+if (Test-Path $StagingRoot) { Remove-Item $StagingRoot -Recurse -Force }
 New-Item $StagingPath -ItemType Directory | Out-Null
 
 # Copy only what belongs in the package
@@ -35,8 +36,8 @@ foreach ($item in $include) {
 $manifest = Join-Path $StagingPath "$ModuleName.psd1"
 Test-ModuleManifest -Path $manifest
 
-# Prepend staging path so PowerShell finds the module by name
-$env:PSModulePath = "$StagingPath;$env:PSModulePath"
+# Prepend staging ROOT so PowerShell finds ModuleName\ModuleName.psd1
+$env:PSModulePath = "$StagingRoot;$env:PSModulePath"
 Import-Module -Name $ModuleName -Force
 
 # Publish by name
@@ -48,6 +49,6 @@ Publish-Module `
     -Verbose
 
 # Clean up
-Remove-Item $StagingPath -Recurse -Force
+Remove-Item $StagingRoot -Recurse -Force
 
 Write-Host "Published $ModuleName successfully." -ForegroundColor Green
