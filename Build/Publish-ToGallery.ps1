@@ -35,9 +35,17 @@ foreach ($item in $include) {
 $manifest = Join-Path $StagingPath "$ModuleName.psd1"
 Test-ModuleManifest -Path $manifest
 
-# Publish from the clean staging folder
+# Prepend staging path so PowerShell finds the module by name
+$env:PSModulePath = "$StagingPath;$env:PSModulePath"
+Import-Module -Name $ModuleName -Force
 
-Publish-Module -Path $StagingPath -NuGetApiKey $NuGetApiKey -Force -Verbose
+# Publish by name
+Publish-Module `
+    -Name $ModuleName `
+    -NuGetApiKey $NuGetApiKey `
+    -Repository PSGallery `
+    -Force `
+    -Verbose
 
 # Clean up
 Remove-Item $StagingPath -Recurse -Force
